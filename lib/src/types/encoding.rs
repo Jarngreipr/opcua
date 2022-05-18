@@ -17,8 +17,9 @@ use crate::types::{constants, status_codes::StatusCode};
 
 pub type EncodingResult<T> = std::result::Result<T, StatusCode>;
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq)]
 pub struct DecodingOptions {
+    #[serde(default = "chrono::Duration::zero", skip)]
     /// Time offset between the client and the server, only used by the client when it's configured
     /// to ignore time skew.
     pub client_offset: Duration,
@@ -30,6 +31,13 @@ pub struct DecodingOptions {
     pub max_byte_string_length: usize,
     /// Maximum number of array elements. 0 actually means 0, i.e. no array permitted
     pub max_array_length: usize,
+    #[serde(default = "default_requested_secure_channel_lifetime", skip)]
+    /// Requested lifetime for secure channel with server (defaults to 60 seconds)
+    pub requested_secure_channel_lifetime: Duration,
+}
+
+fn default_requested_secure_channel_lifetime() -> Duration {
+    Duration::seconds(60)
 }
 
 impl Default for DecodingOptions {
@@ -40,6 +48,7 @@ impl Default for DecodingOptions {
             max_string_length: constants::MAX_STRING_LENGTH,
             max_byte_string_length: constants::MAX_BYTE_STRING_LENGTH,
             max_array_length: constants::MAX_ARRAY_LENGTH,
+            requested_secure_channel_lifetime: default_requested_secure_channel_lifetime(),
         }
     }
 }
@@ -54,6 +63,7 @@ impl DecodingOptions {
             max_string_length: 0,
             max_byte_string_length: 0,
             max_array_length: 0,
+            requested_secure_channel_lifetime: default_requested_secure_channel_lifetime(),
         }
     }
 }

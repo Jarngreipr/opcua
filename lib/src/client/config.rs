@@ -13,7 +13,7 @@ use std::{
 
 use crate::core::config::Config;
 use crate::crypto::SecurityPolicy;
-use crate::types::{ApplicationType, MessageSecurityMode, UAString};
+use crate::types::{ApplicationType, DecodingOptions, MessageSecurityMode, UAString};
 
 use super::session_retry_policy::SessionRetryPolicy;
 
@@ -131,18 +131,6 @@ impl ClientEndpoint {
     pub fn security_policy(&self) -> SecurityPolicy {
         SecurityPolicy::from_str(&self.security_policy).unwrap()
     }
-}
-
-#[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
-pub struct DecodingOptions {
-    /// Maximum size of a message chunk in bytes. 0 means no limit
-    pub max_chunk_count: usize,
-    /// Maximum length in bytes (not chars!) of a string. 0 actually means 0, i.e. no string permitted
-    pub max_string_length: usize,
-    /// Maximum length in bytes of a byte string. 0 actually means 0, i.e. no byte string permitted
-    pub max_byte_string_length: usize,
-    /// Maximum number of array elements. 0 actually means 0, i.e. no array permitted
-    pub max_array_length: usize,
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
@@ -329,12 +317,7 @@ impl ClientConfig {
             session_retry_limit: SessionRetryPolicy::DEFAULT_RETRY_LIMIT as i32,
             session_retry_interval: SessionRetryPolicy::DEFAULT_RETRY_INTERVAL_MS,
             session_timeout: 0,
-            decoding_options: DecodingOptions {
-                max_array_length: decoding_options.max_array_length,
-                max_string_length: decoding_options.max_string_length,
-                max_byte_string_length: decoding_options.max_byte_string_length,
-                max_chunk_count: decoding_options.max_chunk_count,
-            },
+            decoding_options,
             performance: Performance {
                 ignore_clock_skew: false,
                 single_threaded_executor: true,

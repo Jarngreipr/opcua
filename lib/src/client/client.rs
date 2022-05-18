@@ -430,6 +430,7 @@ impl Client {
             max_string_length: decoding_options.max_string_length,
             max_byte_string_length: decoding_options.max_byte_string_length,
             max_array_length: decoding_options.max_array_length,
+            requested_secure_channel_lifetime: decoding_options.requested_secure_channel_lifetime,
             client_offset: Duration::zero(),
         }
     }

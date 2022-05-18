@@ -712,6 +712,8 @@ impl ServerConfig {
             max_string_length: self.limits.max_string_length as usize,
             max_byte_string_length: self.limits.max_byte_string_length as usize,
             max_array_length: self.limits.max_array_length as usize,
+            // Does not apply to server
+            requested_secure_channel_lifetime: chrono::Duration::zero(),
         }
     }
 

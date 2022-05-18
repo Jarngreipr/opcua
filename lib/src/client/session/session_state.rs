@@ -3,6 +3,7 @@
 // Copyright (C) 2017-2022 Adam Lock
 
 use std::{
+    convert::TryFrom,
     sync::{
         atomic::{AtomicU32, Ordering},
         mpsc::{self, Receiver, SyncSender},
@@ -428,8 +429,6 @@ impl SessionState {
     ) -> Result<(), StatusCode> {
         trace!("issue_or_renew_secure_channel({:?})", request_type);
 
-        const REQUESTED_LIFETIME: u32 = 60000; // TODO
-
         let (security_mode, security_policy, client_nonce) = {
             let mut secure_channel = trace_write_lock!(self.secure_channel);
             let client_nonce = secure_channel.security_policy().random_nonce();
@@ -445,7 +444,24 @@ impl SessionState {
         info!("security_mode = {:?}", security_mode);
         info!("security_policy = {:?}", security_policy);
 
-        let requested_lifetime = REQUESTED_LIFETIME;
+        let requested_lifetime = match u32::try_from(
+            self.secure_channel
+                .read()
+                .decoding_options()
+                .requested_secure_channel_lifetime
+                .num_milliseconds(),
+        ) {
+            Ok(requested_lifetime) => requested_lifetime,
+            Err(e) => {
+                error!(
+                    "requested secure channel lifetime overflowed u32, using default - {}",
+                    e
+                );
+                DecodingOptions::default()
+                    .requested_secure_channel_lifetime
+                    .num_milliseconds() as u32
+            }
+        };
         let request = OpenSecureChannelRequest {
             request_header: self.make_request_header(),
             client_protocol_version: 0,

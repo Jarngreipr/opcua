@@ -102,6 +102,7 @@ fn chunk_multi_encode_decode() {
         max_string_length: 65535,
         max_byte_string_length: 65535,
         max_array_length: 20000, // Need to bump this up because large response uses a large array
+        requested_secure_channel_lifetime: chrono::Duration::zero(),
     });
 
     let response = make_large_read_response();
